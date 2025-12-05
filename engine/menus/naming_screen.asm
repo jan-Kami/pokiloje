@@ -476,7 +476,7 @@ PrintNamingText:
 	call PlaceString
 	ld hl, $1
 	add hl, bc
-	ld [hl], 'の' ; leftover from Japanese version; blank tile $c9 in English
+	ld [hl], ' ' ; 'の' ; leftover from Japanese version; blank tile $c9 in English
 	hlcoord 1, 3
 	ld de, NicknameTextString
 	jr .placeString
@@ -489,13 +489,13 @@ PrintNamingText:
 	jp PlaceString
 
 YourTextString:
-	db "YOUR @"
+	db "󱥂@" ; "YOUR @"
 
 RivalsTextString:
-	db "RIVAL's @"
+	db "󱥂󱥍󱤑󱥱@" ; "RIVAL's @"
 
 NameTextString:
-	db "NAME?@"
+	db "󱥞󱤧󱥙@" ; "NAME?@"
 
 NicknameTextString:
-	db "NICKNAME?@"
+	db "󱥂󱤧󱥙@" ; "NICKNAME?@"

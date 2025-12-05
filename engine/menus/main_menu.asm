@@ -341,18 +341,18 @@ SpecialEnterMap::
 	jp EnterMap
 
 ContinueText:
-	db "CONTINUE"
+	db "󱥄󱤻󱤈" ; db "CONTINUE"
 	next ""
 	; fallthrough
 
 NewGameText:
-	db   "NEW GAME"
-	next "OPTION@"
+	db   "󱥄󱤻󱥝"   ; db   "NEW GAME"
+	next "󱥄󱤆󱤉󱤤@" ; next "OPTION@"
 
 CableClubOptionsText:
-	db   "TRADE CENTER"
-	next "COLOSSEUM"
-	next "CANCEL@"
+	db   "󱥭󱥌" ; db   "TRADE CENTER"
+	next "󱥭󱥱" ; next "COLOSSEUM"
+	next "󱥄󱤂@" ; next "CANCEL@"
 
 DisplayContinueGameInfo:
 	xor a
@@ -435,10 +435,10 @@ PrintPlayTime:
 	jp PrintNumber
 
 SaveScreenInfoText:
-	db   "PLAYER"
-	next "BADGES    "
-	next "#DEX    "
-	next "TIME@"
+	db   "󱥂󱥍󱤑󱤻󱤧　" ; "PLAYER"
+	next "󱤽󱥍󱥠󱥱󱤧" ; "BADGES    "
+	next "󱤽󱥍󱤪<POKIMON>󱤧      " ; "#DEX    "
+	next "　　󱥫󱤧  @" ; "TIME@"
 
 DisplayOptionMenu:
 	hlcoord 0, 0
@@ -593,20 +593,20 @@ DisplayOptionMenu:
 	ld [wOptionsTextSpeedCursorX], a ; text speed cursor X coordinate
 	jp .eraseOldMenuCursor
 
-TextSpeedOptionText:
-	db   "TEXT SPEED"
-	next " FAST  MEDIUM SLOW@"
+TextSpeedOptionText:  ; not the best translation tbh, pona being medium feels weird
+	db   "󱥠󱥬󱤧󱥩"                         ; "TEXT SPEED"
+	next "　󱥵　　　　　󱥔　　　　　　󱤨　　　@" ; " FAST  MEDIUM SLOW@"
 
 BattleAnimationOptionText:
-	db   "BATTLE ANIMATION"
-	next " ON       OFF@"
+	db   "󱥠󱥩󱥱"                   ; "BATTLE ANIMATION"
+	next "　󱤬　　　　　　　　󱤂　　@" ; " ON       OFF@"
 
 BattleStyleOptionText:
-	db   "BATTLE STYLE"
-	next " SHIFT    SET@"
+	db   "<POKIMON>󱤍󱤧󱤷󱤡<POKIMON>󱥞󱤧󱤘󱤆󱤂󱤆" ; "BATTLE STYLE"
+	next "　󱤆　　　　　　　　󱤆󱤂　@"             ; " SHIFT    SET@"
 
 OptionMenuCancelText:
-	db "CANCEL@"
+	db "󱥄󱤂@" ; "CANCEL@"
 
 ; sets the options variable according to the current placement of the menu cursors in the options menu
 SetOptionsFromCursorPositions:
