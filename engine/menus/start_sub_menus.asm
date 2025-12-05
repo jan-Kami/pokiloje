@@ -494,13 +494,13 @@ DrawTrainerInfo:
 	ld bc, 8 tiles
 	push bc
 	call TrainerInfo_FarCopyData
-	ld hl, BlankLeaderNames
-	ld de, vChars2 tile $60
-	ld bc, $17 tiles
+	ld hl, CircleTile
+	ld de, vChars2 tile $76
+	ld bc, 1 tiles
 	call TrainerInfo_FarCopyData
 	pop bc
 	ld hl, BadgeNumbersTileGraphics  ; badge number tile patterns
-	ld de, vChars1 tile $58
+	ld de, vChars1 tile $E8
 	call TrainerInfo_FarCopyData
 	ld hl, GymLeaderFaceAndBadgeTileGraphics  ; gym leader face and badge tile patterns
 	ld de, vChars2 tile $20
@@ -510,14 +510,14 @@ DrawTrainerInfo:
 	ld hl, TextBoxGraphics
 	ld de, 13 tiles
 	add hl, de ; hl = colon tile pattern
-	ld de, vChars1 tile $56
+	ld de, vChars1 tile $E6
 	ld bc, 1 tiles
 	ld a, BANK(TextBoxGraphics)
 	push bc
 	call FarCopyData2
 	pop bc
 	ld hl, TrainerInfoTextBoxTileGraphics tile 8  ; background tile pattern
-	ld de, vChars1 tile $57
+	ld de, vChars1 tile $E7
 	call TrainerInfo_FarCopyData
 	call EnableLCD
 	ld hl, wTrainerInfoTextBoxWidthPlus1
@@ -537,7 +537,7 @@ DrawTrainerInfo:
 	hlcoord 1, 10
 	call TrainerInfo_DrawTextBox
 	hlcoord 0, 10
-	ld a, $d7
+	ld a, $67
 	call TrainerInfo_DrawVerticalLine
 	hlcoord 19, 10
 	call TrainerInfo_DrawVerticalLine
@@ -558,7 +558,7 @@ DrawTrainerInfo:
 	ld de, wPlayTimeHours ; hours
 	lb bc, LEFT_ALIGN | 1, 3
 	call PrintNumber
-	ld [hl], $d6 ; colon tile ID
+	ld [hl], $66 ; colon tile ID
 	inc hl
 	ld de, wPlayTimeMinutes ; minutes
 	lb bc, LEADING_ZEROES | 1, 2
