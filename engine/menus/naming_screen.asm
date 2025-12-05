@@ -198,7 +198,8 @@ DisplayNamingScreen:
 	push de
 .pressedSelect
 	ld a, [wAlphabetCase]
-	xor $1
+	add $1
+	and $3
 	ld [wAlphabetCase], a
 	ret
 
@@ -340,8 +341,15 @@ PrintAlphabet:
 	ld a, [wAlphabetCase]
 	and a
 	ld de, LowerCaseAlphabet
-	jr nz, .lowercase
+	jr z, .lowercase
+	dec a
 	ld de, UpperCaseAlphabet
+	jr z, .lowercase
+	dec a
+	ld de, ThirdCaseAlphabet
+	jr z, .lowercase
+	dec a
+	ld de, FourthCaseAlphabet
 .lowercase
 	hlcoord 2, 5
 	lb bc, 5, 9 ; 5 rows, 9 columns

@@ -384,3 +384,134 @@
 	charmap "７", $fd
 	charmap "８", $fe
 	charmap "９", $ff
+
+
+; Sitelen Pona, nimi pu (from gfx/font/font.png)
+    charmap "󱤀", $80
+	charmap "󱤁", $81
+	charmap "󱥴", $82 ; waso, not ala
+	charmap "󱤃", $83
+	charmap "󱥵", $84 ; wawa, not ale
+	charmap "󱤅", $85
+	charmap "󱤆", $86
+	charmap "󱤇", $87
+	charmap "󱤈", $88
+	charmap "󱤉", $89
+	charmap "󱤊", $8a
+	charmap "󱤋", $8b
+	charmap "󱤌", $8c
+	charmap "󱤍", $8d
+	charmap "󱤎", $8e
+	charmap "󱤏", $8f
+	charmap "󱤐", $90
+	charmap "󱤑", $91
+	charmap "󱤒", $92
+	charmap "󱤓", $93
+	charmap "󱤔", $94
+	charmap "󱤕", $95
+	charmap "󱤖", $96
+	charmap "󱤗", $97
+	charmap "󱤘", $98
+	charmap "󱤙", $99
+	charmap "󱤚", $9a
+	charmap "󱤛", $9b
+	charmap "󱤜", $9c
+	charmap "󱤝", $9d
+	charmap "󱤞", $9e
+	charmap "󱤟", $9f
+	charmap "󱤠", $a0
+	charmap "󱤡", $a1
+	charmap "󱤢", $a2
+	charmap "󱤣", $a3
+	charmap "󱤤", $a4
+	charmap "󱤥", $a5
+	charmap "󱤦", $a6
+	charmap "󱤧", $a7
+	charmap "󱤨", $a8
+	charmap "󱤩", $a9
+	charmap "󱤪", $aa
+	charmap "󱤫", $ab
+	charmap "󱤬", $ac
+	charmap "󱥶", $ad ; weka, not luka
+	charmap "󱤮", $ae
+	charmap "󱤯", $af
+	charmap "󱤰", $b0
+	charmap "󱤱", $b1
+	charmap "󱤲", $b2
+	charmap "󱤳", $b3
+	charmap "󱤴", $b4
+	charmap "󱤵", $b5
+	charmap "󱤶", $b6
+	charmap "󱤷", $b7
+	charmap "󱤸", $b8
+	charmap "󱤹", $b9
+	charmap "󱤺", $ba
+	charmap "󱤻", $bb
+	charmap "󱥷", $bc ; wile, not mute
+	charmap "󱤽", $bd
+	charmap "󱤾", $be
+	charmap "󱤿", $bf
+	charmap "󱥀", $c0
+	charmap "󱥁", $c1
+	charmap "󱥂", $c2
+	charmap "󱥃", $c3
+	charmap "󱥄", $c4
+	charmap "󱥅", $c5
+	charmap "󱥆", $c6
+	charmap "󱥇", $c7
+	charmap "󱥈", $c8
+	charmap "󱥉", $c9
+	charmap "󱥊", $ca
+	charmap "󱥋", $cb
+	charmap "󱥌", $cc
+	charmap "󱥍", $cd
+	charmap "󱥎", $ce
+	charmap "󱥏", $cf
+	charmap "󱥐", $d0
+	charmap "󱥑", $d1
+	charmap "󱥒", $d2
+	charmap "󱥓", $d3
+	charmap "󱥔", $d4
+	charmap "󱥕", $d5
+	charmap "󱥖", $d6
+	charmap "󱥗", $d7
+	charmap "󱥘", $d8
+	charmap "󱥙", $d9
+	charmap "󱥚", $da
+	charmap "󱥛", $db
+	charmap "󱥜", $dc
+	charmap "󱥝", $dd
+	charmap "󱥞", $de
+	charmap "󱥟", $df
+	charmap "󱥠", $e0
+	charmap "󱥡", $e1
+	charmap "󱥢", $e2
+	charmap "󱥣", $e3
+	charmap "󱥤", $e4
+	charmap "󱥥", $e5
+	charmap "󱥦", $e6
+	charmap "󱥧", $e7
+	charmap "󱥨", $e8
+    charmap "󱥩", $e9
+	charmap "󱥪", $ea
+	charmap "󱥫", $eb
+	charmap "▷", $ec ; Arrows from Vanilla
+	charmap "▶", $ed ; Not sure *exactly* where they are used
+	charmap "▼", $ee ; So not gonna remove them
+	charmap "󱥬", $ef
+	charmap "󱥭", $f0
+	charmap "　", $f1 ; Ideographic space, not tu
+	charmap "󱥯", $f2
+	charmap "󱥰", $f3
+	charmap "󱥱", $f4
+	charmap "󱥲", $f5
+	charmap "󱤂", $f6 ; ala
+	charmap "󱥳", $f7 ; wan
+	charmap "󱥮", $f8 ; tu
+	charmap "󱤼", $f9 ; mute
+	charmap "<TU_TU>", $fa ; tu tu
+	charmap "󱤭", $fb ; luka
+	charmap "<LUKA_WAN>", $fc ; luka wan
+	charmap "<LUKA_TU>", $fd ; luka tu
+	charmap "<LUKA_MUTE>", $fe ; luka mute
+	charmap "󱤄", $ff ; ale
