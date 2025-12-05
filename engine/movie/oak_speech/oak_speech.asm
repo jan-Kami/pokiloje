@@ -4,9 +4,9 @@ PrepareOakSpeech:
 	ld a, [wOptions]
 	push af
 	; Retrieve BIT_DEBUG_MODE set in DebugMenu for StartNewGameDebug.
-	; BUG: StartNewGame carries over bit 5 from previous save files,
+	; BUG: StartNewGame carries over BIT_ALWAYS_ON_BIKE from previous save files,
 	; which causes CheckForceBikeOrSurf to not return.
-	; To fix this in debug builds, reset bit 5 here or in StartNewGame.
+	; To fix this in debug builds, reset BIT_ALWAYS_ON_BIKE here or in StartNewGame.
 	; In non-debug builds, the instructions can be removed.
 	ld a, [wStatusFlags6]
 	push af
@@ -73,7 +73,7 @@ OakSpeech:
 	call GBFadeOutToWhite
 	call ClearScreen
 	ld a, NIDORINO
-	ld [wd0b5], a
+	ld [wCurSpecies], a
 	ld [wCurPartySpecies], a
 	call GetMonHeader
 	hlcoord 6, 4
@@ -117,8 +117,11 @@ OakSpeech:
 	ld a, SFX_SHRINK
 	call PlaySound
 	pop af
+; bug: switching ROM Bank should not happen outside of Home Bank
+; This code does nothing, as PlaySound does all necessary Bank switch
+; It looks like a leftover from an early development stage
 	ldh [hLoadedROMBank], a
-	ld [MBC1RomBank], a
+	ld [rROMB], a
 	ld c, 4
 	call DelayFrames
 	ld de, RedSprite
@@ -145,8 +148,9 @@ OakSpeech:
 	ld [wNewSoundID], a
 	call PlaySound
 	pop af
+; bug: switching ROM Bank should not happen outside of Home Bank
 	ldh [hLoadedROMBank], a
-	ld [MBC1RomBank], a
+	ld [rROMB], a
 	ld c, 20
 	call DelayFrames
 	hlcoord 6, 5
@@ -160,21 +164,26 @@ OakSpeech:
 	call DelayFrames
 	call GBFadeOutToWhite
 	jp ClearScreen
+
 OakSpeechText1:
 	text_far _OakSpeechText1
 	text_end
+
 OakSpeechText2:
 	text_far _OakSpeechText2A
 	; BUG: The cry played does not match the sprite displayed.
 	sound_cry_nidorina
 	text_far _OakSpeechText2B
 	text_end
+
 IntroducePlayerText:
 	text_far _IntroducePlayerText
 	text_end
+
 IntroduceRivalText:
 	text_far _IntroduceRivalText
 	text_end
+
 OakSpeechText3:
 	text_far _OakSpeechText3
 	text_end
@@ -226,7 +235,7 @@ IntroDisplayPicCenteredOrUpperRight:
 	call UncompressSpriteFromDE
 	ld hl, sSpriteBuffer1
 	ld de, sSpriteBuffer0
-	ld bc, $310
+	ld bc, 2 * SPRITEBUFFERSIZE
 	call CopyData
 	ld de, vFrontPic
 	call InterlaceMergeSpriteBuffers

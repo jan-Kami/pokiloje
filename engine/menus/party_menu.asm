@@ -51,7 +51,7 @@ RedrawPartyMenu_::
 	dec hl
 	dec hl
 	dec hl
-	ld a, "▷" ; unfilled right arrow menu cursor
+	ld a, '▷' ; unfilled right arrow menu cursor
 	ld [hli], a ; place the cursor
 	inc hl
 	inc hl
@@ -70,12 +70,12 @@ RedrawPartyMenu_::
 	push hl
 	ld bc, SCREEN_WIDTH + 1 ; down 1 row and right 1 column
 	ldh a, [hUILayoutFlags]
-	set 0, a
+	set BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	add hl, bc
 	predef DrawHP2 ; draw HP bar and prints current / max HP
 	ldh a, [hUILayoutFlags]
-	res 0, a
+	res BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	call SetPartyMenuHPBarColor ; color the HP bar (on SGB)
 	pop hl
@@ -131,7 +131,7 @@ RedrawPartyMenu_::
 	ld l, a
 	ld de, wEvoDataBuffer
 	ld a, BANK(EvosMovesPointerTable)
-	ld bc, 4 * 3 + 1 ; enough for Eevee's three 4-byte evolutions and 0 terminator
+	ld bc, wEvoDataBufferEnd - wEvoDataBuffer
 	call FarCopyData
 	ld hl, wEvoDataBuffer
 	ld de, .notAbleToEvolveText

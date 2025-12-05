@@ -9,7 +9,7 @@ AskName:
 	ld c, 11
 	call z, ClearScreenArea ; only if in wild battle
 	ld a, [wCurPartySpecies]
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetMonName
 	ld hl, DoYouWantToNicknameText
 	call PrintText
@@ -40,7 +40,7 @@ AskName:
 	pop af
 	ld [wUpdateSpritesEnabled], a
 	ld a, [wStringBuffer]
-	cp "@"
+	cp '@'
 	ret nz
 .declinedNickname
 	ld d, h
@@ -64,7 +64,7 @@ DisplayNameRaterScreen::
 	call RestoreScreenTilesAndReloadTilePatterns
 	call LoadGBPal
 	ld a, [wStringBuffer]
-	cp "@"
+	cp '@'
 	jr z, .playerCancelled
 	ld hl, wPartyMonNicks
 	ld bc, NAME_LENGTH
@@ -108,7 +108,7 @@ DisplayNamingScreen:
 	ld [wMenuWatchedKeys], a
 	ld a, 7
 	ld [wMaxMenuItem], a
-	ld a, "@"
+	ld a, '@'
 	ld [wStringBuffer], a
 	xor a
 	ld hl, wNamingScreenSubmitName
@@ -218,11 +218,11 @@ DisplayNamingScreen:
 .didNotPressED
 	ld a, [wCurrentMenuItem]
 	cp $6 ; case switch row
-	jr nz, .didNotPressCaseSwtich
+	jr nz, .didNotPressCaseSwitch
 	ld a, [wTopMenuItemX]
 	cp $1 ; case switch column
 	jr z, .pressedA_changedCase
-.didNotPressCaseSwtich
+.didNotPressCaseSwitch
 	ld hl, wMenuCursorLocation
 	ld a, [hli]
 	ld h, [hl]
@@ -232,21 +232,21 @@ DisplayNamingScreen:
 	ld [wNamingScreenLetter], a
 	call CalcStringLength
 	ld a, [wNamingScreenLetter]
-	cp "ﾞ"
+	cp 'ﾞ'
 	ld de, Dakutens
 	jr z, .dakutensAndHandakutens
-	cp "ﾟ"
+	cp 'ﾟ'
 	ld de, Handakutens
 	jr z, .dakutensAndHandakutens
 	ld a, [wNamingScreenType]
 	cp NAME_MON_SCREEN
 	jr nc, .checkMonNameLength
 	ld a, [wNamingScreenNameLength]
-	cp $7 ; max length of player/rival names
+	cp PLAYER_NAME_LENGTH - 1
 	jr .checkNameLength
 .checkMonNameLength
 	ld a, [wNamingScreenNameLength]
-	cp $a ; max length of pokemon nicknames
+	cp NAME_LENGTH - 1
 .checkNameLength
 	jr c, .addLetter
 	ret
@@ -260,7 +260,7 @@ DisplayNamingScreen:
 .addLetter
 	ld a, [wNamingScreenLetter]
 	ld [hli], a
-	ld [hl], "@"
+	ld [hl], '@'
 	ld a, SFX_PRESS_AB
 	call PlaySound
 	ret
@@ -270,7 +270,7 @@ DisplayNamingScreen:
 	ret z
 	call CalcStringLength
 	dec hl
-	ld [hl], "@"
+	ld [hl], '@'
 	ret
 .pressedRight
 	ld a, [wCurrentMenuItem]
@@ -328,7 +328,7 @@ LoadEDTile:
 	ld de, ED_Tile
 	ld hl, vFont tile $70
 	; BUG: BANK("Home") should be BANK(ED_Tile), although it coincidentally works as-is
-	lb bc, BANK("Home"), (ED_TileEnd - ED_Tile) / $8
+	lb bc, BANK("Home"), (ED_TileEnd - ED_Tile) / TILE_1BPP_SIZE
 	jp CopyVideoDataDouble
 
 ED_Tile:
@@ -450,7 +450,7 @@ CalcStringLength:
 	ld c, $0
 .loop
 	ld a, [hl]
-	cp "@"
+	cp '@'
 	ret z
 	inc hl
 	inc c
@@ -470,13 +470,13 @@ PrintNamingText:
 	push af
 	farcall WriteMonPartySpriteOAMBySpecies
 	pop af
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetMonName
 	hlcoord 4, 1
 	call PlaceString
 	ld hl, $1
 	add hl, bc
-	ld [hl], "の" ; leftover from Japanese version; blank tile $c9 in English
+	ld [hl], 'の' ; leftover from Japanese version; blank tile $c9 in English
 	hlcoord 1, 3
 	ld de, NicknameTextString
 	jr .placeString

@@ -468,7 +468,7 @@ ItemUseBall:
 
 	push hl
 
-; If the Pokémon is transformed, the Pokémon is assumed to be a Ditto.
+; Bug: If the Pokémon is transformed, the Pokémon is assumed to be a Ditto.
 ; This is a bug because a wild Pokémon could have used Transform via
 ; Mirror Move even though the only wild Pokémon that knows Transform is Ditto.
 	ld hl, wEnemyBattleStatus3
@@ -510,7 +510,7 @@ ItemUseBall:
 	ld a, [wEnemyMonSpecies]
 	ld [wCapturedMonSpecies], a
 	ld [wCurPartySpecies], a
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	ld a, [wBattleType]
 	dec a ; is this the old man battle?
 	jr z, .oldManCaughtMon ; if so, don't give the player the caught Pokémon
@@ -520,7 +520,7 @@ ItemUseBall:
 
 ; Add the caught Pokémon to the Pokédex.
 	predef IndexToPokedex
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	dec a
 	ld c, a
 	ld b, FLAG_TEST
@@ -528,7 +528,7 @@ ItemUseBall:
 	predef FlagActionPredef
 	ld a, c
 	push af
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	dec a
 	ld c, a
 	ld b, FLAG_SET
@@ -542,7 +542,7 @@ ItemUseBall:
 	call PrintText
 	call ClearSprites
 	ld a, [wEnemyMonSpecies]
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	predef ShowPokedexData
 
 .skipShowingPokedexData
@@ -688,11 +688,11 @@ ItemUseSurfboard:
 	jp PrintText
 .tryToStopSurfing
 	xor a
-	ldh [hSpriteIndexOrTextID], a
+	ldh [hSpriteIndex], a
 	ld d, 16 ; talking range in pixels (normal range)
 	call IsSpriteInFrontOfPlayer2
-	res 7, [hl]
-	ldh a, [hSpriteIndexOrTextID]
+	res BIT_FACE_PLAYER, [hl]
+	ldh a, [hSpriteIndex]
 	and a ; is there a sprite in the way?
 	jr nz, .cannotStopSurfing
 	ld hl, TilePairCollisionsWater
@@ -727,15 +727,15 @@ ItemUseSurfboard:
 .makePlayerMoveForward
 	ld a, [wPlayerDirection] ; direction the player is going
 	bit PLAYER_DIR_BIT_UP, a
-	ld b, D_UP
+	ld b, PAD_UP
 	jr nz, .storeSimulatedButtonPress
 	bit PLAYER_DIR_BIT_DOWN, a
-	ld b, D_DOWN
+	ld b, PAD_DOWN
 	jr nz, .storeSimulatedButtonPress
 	bit PLAYER_DIR_BIT_LEFT, a
-	ld b, D_LEFT
+	ld b, PAD_LEFT
 	jr nz, .storeSimulatedButtonPress
-	ld b, D_RIGHT
+	ld b, PAD_RIGHT
 .storeSimulatedButtonPress
 	ld a, b
 	ld [wSimulatedJoypadStatesEnd], a
@@ -774,7 +774,7 @@ ItemUseEvoStone:
 	jr c, .canceledItemUse
 	ld a, b
 	ld [wCurPartySpecies], a
-	ld a, $01
+	ld a, TRUE
 	ld [wForceEvolution], a
 	ld a, SFX_HEAL_AILMENT
 	call PlaySoundWaitForCurrent
@@ -834,7 +834,7 @@ ItemUseMedicine:
 .getPartyMonDataAddress
 	jp c, .canceledItemUse
 	ld hl, wPartyMons
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	ld a, [wWhichPokemon]
 	call AddNTimes
 	ld a, [wWhichPokemon]
@@ -842,7 +842,7 @@ ItemUseMedicine:
 	ld d, a
 	ld a, [wCurPartySpecies]
 	ld e, a
-	ld [wd0b5], a
+	ld [wCurSpecies], a
 	pop af
 	ld [wCurItem], a
 	pop af
@@ -866,7 +866,7 @@ ItemUseMedicine:
 	jr nc, .healHP ; if it's a Full Restore or one of the potions
 ; fall through if it's one of the status-specific healing items
 .cureStatusAilment
-	ld bc, wPartyMon1Status - wPartyMon1
+	ld bc, MON_STATUS
 	add hl, bc ; hl now points to status
 	ld a, [wCurItem]
 	lb bc, ANTIDOTE_MSG, 1 << PSN
@@ -904,7 +904,7 @@ ItemUseMedicine:
 	ld hl, wPlayerBattleStatus3
 	res BADLY_POISONED, [hl] ; heal Toxic status
 	pop hl
-	ld bc, wPartyMon1Stats - wPartyMon1Status
+	ld bc, MON_STATS - MON_STATUS
 	add hl, bc ; hl now points to party stats
 	ld de, wBattleMonStats
 	ld bc, NUM_STATS * 2
@@ -962,7 +962,7 @@ ItemUseMedicine:
 .compareCurrentHPToMaxHP
 	push hl
 	push bc
-	ld bc, wPartyMon1MaxHP - (wPartyMon1HP + 1)
+	ld bc, MON_MAXHP - (MON_HP + 1)
 	add hl, bc ; hl now points to max HP
 	pop bc
 	ld a, [hli]
@@ -994,7 +994,7 @@ ItemUseMedicine:
 	ld [wChannelSoundIDs + CHAN5], a
 	push hl
 	push de
-	ld bc, wPartyMon1MaxHP - (wPartyMon1HP + 1)
+	ld bc, MON_MAXHP - (MON_HP + 1)
 	add hl, bc ; hl now points to max HP
 	ld a, [hli]
 	ld [wHPBarMaxHP+1], a
@@ -1015,7 +1015,7 @@ ItemUseMedicine:
 	push af
 	ld hl, wPartyMon1MaxHP
 	ld a, [wWhichPokemon]
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	ld a, [hli]
 	ld [wHPBarMaxHP + 1], a
@@ -1027,7 +1027,7 @@ ItemUseMedicine:
 	ldh [hDivisor], a
 	ld b, 2 ; number of bytes
 	call Divide ; get 1/5 of max HP of pokemon that used Softboiled
-	ld bc, (wPartyMon1HP + 1) - (wPartyMon1MaxHP + 1)
+	ld bc, (MON_HP + 1) - (MON_MAXHP + 1)
 	add hl, bc ; hl now points to LSB of current HP of pokemon that used Softboiled
 ; subtract 1/5 of max HP from current HP of pokemon that used Softboiled
 	ldh a, [hQuotient + 3]
@@ -1052,13 +1052,13 @@ ItemUseMedicine:
 	ld a, SFX_HEAL_HP
 	call PlaySoundWaitForCurrent
 	ldh a, [hUILayoutFlags]
-	set 0, a
+	set BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	ld a, $02
 	ld [wHPBarType], a
 	predef UpdateHPBar2 ; animate HP bar decrease of pokemon that used Softboiled
 	ldh a, [hUILayoutFlags]
-	res 0, a
+	res BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	pop af
 	ld b, a ; store heal amount (1/5 of max HP)
@@ -1106,7 +1106,7 @@ ItemUseMedicine:
 	inc hl
 	ld d, h
 	ld e, l ; de now points to current HP
-	ld hl, (wPartyMon1MaxHP + 1) - (wPartyMon1HP + 1)
+	ld hl, (MON_MAXHP + 1) - (MON_HP + 1)
 	add hl, de ; hl now points to max HP
 	ld a, [wCurItem]
 	cp REVIVE
@@ -1153,7 +1153,7 @@ ItemUseMedicine:
 	ld a, [wCurItem]
 	cp FULL_RESTORE
 	jr nz, .updateInBattleData
-	ld bc, wPartyMon1Status - (wPartyMon1MaxHP + 1)
+	ld bc, MON_STATUS - (MON_MAXHP + 1)
 	add hl, bc
 	xor a
 	ld [hl], a ; remove the status ailment in the party data
@@ -1202,13 +1202,13 @@ ItemUseMedicine:
 	ld a, SFX_HEAL_HP
 	call PlaySoundWaitForCurrent
 	ldh a, [hUILayoutFlags]
-	set 0, a
+	set BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	ld a, $02
 	ld [wHPBarType], a
 	predef UpdateHPBar2 ; animate the HP bar lengthening
 	ldh a, [hUILayoutFlags]
-	res 0, a
+	res BIT_PARTY_MENU_HP_BAR, a
 	ldh [hUILayoutFlags], a
 	ld a, REVIVE_MSG
 	ld [wPartyMenuTypeOrMessageID], a
@@ -1254,9 +1254,9 @@ ItemUseMedicine:
 .useVitamin
 	push hl
 	ld a, [hl]
-	ld [wd0b5], a
-	ld [wd11e], a
-	ld bc, wPartyMon1Level - wPartyMon1
+	ld [wCurSpecies], a
+	ld [wPokedexNum], a
+	ld bc, MON_LEVEL
 	add hl, bc ; hl now points to level
 	ld a, [hl] ; a = level
 	ld [wCurEnemyLevel], a ; store level
@@ -1273,7 +1273,7 @@ ItemUseMedicine:
 	push hl
 	sub HP_UP
 	add a
-	ld bc, wPartyMon1HPExp - wPartyMon1
+	ld bc, MON_HP_EXP
 	add hl, bc
 	add l
 	ld l, a
@@ -1302,13 +1302,13 @@ ItemUseMedicine:
 .statNameInnerLoop
 	ld a, [hli]
 	ld b, a
-	ld a, $50
+	ld a, '@'
 	cp b
 	jr nz, .statNameInnerLoop
 	jr .statNameLoop
 .gotStatName
 	ld de, wStringBuffer
-	ld bc, 10
+	ld bc, NAME_LENGTH - 1 ; all VitaminStats are at most 10 bytes
 	call CopyData ; copy the stat's name to wStringBuffer
 	ld a, SFX_HEAL_AILMENT
 	call PlaySound
@@ -1321,17 +1321,17 @@ ItemUseMedicine:
 	call PrintText
 	jp GBPalWhiteOut
 .recalculateStats
-	ld bc, wPartyMon1Stats - wPartyMon1
+	ld bc, MON_STATS
 	add hl, bc
 	ld d, h
 	ld e, l ; de now points to stats
-	ld bc, (wPartyMon1Exp + 2) - wPartyMon1Stats
+	ld bc, (MON_EXP + 2) - MON_STATS
 	add hl, bc ; hl now points to LSB of experience
 	ld b, 1
 	jp CalcStats ; recalculate stats
 .useRareCandy
 	push hl
-	ld bc, wPartyMon1Level - wPartyMon1
+	ld bc, MON_LEVEL
 	add hl, bc ; hl now points to level
 	ld a, [hl] ; a = level
 	cp MAX_LEVEL
@@ -1345,7 +1345,7 @@ ItemUseMedicine:
 	callfar CalcExperience ; calculate experience for next level and store it at hExperience
 	pop de
 	pop hl
-	ld bc, wPartyMon1Exp - wPartyMon1Level
+	ld bc, MON_EXP - MON_LEVEL
 	add hl, bc ; hl now points to MSB of experience
 ; update experience to minimum for new level
 	ldh a, [hExperience]
@@ -1361,7 +1361,7 @@ ItemUseMedicine:
 	push af
 	push de
 	push hl
-	ld bc, wPartyMon1MaxHP - wPartyMon1
+	ld bc, MON_MAXHP
 	add hl, bc ; hl now points to MSB of max HP
 	ld a, [hli]
 	ld b, a
@@ -1371,7 +1371,7 @@ ItemUseMedicine:
 	push hl
 	call .recalculateStats
 	pop hl
-	ld bc, (wPartyMon1MaxHP + 1) - wPartyMon1
+	ld bc, (MON_MAXHP + 1)
 	add hl, bc ; hl now points to LSB of max HP
 	pop bc
 	ld a, [hld]
@@ -1381,7 +1381,7 @@ ItemUseMedicine:
 	sbc b
 	ld b, a ; bc = the amount of max HP gained from leveling up
 ; add the amount gained to the current HP
-	ld de, (wPartyMon1HP + 1) - wPartyMon1MaxHP
+	ld de, (MON_HP + 1) - MON_MAXHP
 	add hl, de ; hl now points to LSB of current HP
 	ld a, [hl]
 	add c
@@ -1396,19 +1396,19 @@ ItemUseMedicine:
 	ld a, d
 	ld [wWhichPokemon], a
 	ld a, e
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	xor a ; PLAYER_PARTY_DATA
 	ld [wMonDataLocation], a
 	call LoadMonData
-	ld d, $01
-	callfar PrintStatsBox ; display new stats text box
-	call WaitForTextScrollButtonPress ; wait for button press
+	ld d, LEVEL_UP_STATS_BOX
+	callfar PrintStatsBox
+	call WaitForTextScrollButtonPress
 	xor a ; PLAYER_PARTY_DATA
 	ld [wMonDataLocation], a
-	predef LearnMoveFromLevelUp ; learn level up move, if any
+	predef LearnMoveFromLevelUp
 	xor a
 	ld [wForceEvolution], a
-	callfar TryEvolvingMon ; evolve pokemon, if appropriate
+	callfar TryEvolvingMon
 	ld a, $01
 	ld [wUpdateSpritesEnabled], a
 	pop af
@@ -1433,11 +1433,11 @@ INCLUDE "data/battle/stat_names.asm"
 ItemUseBait:
 	ld hl, ThrewBaitText
 	call PrintText
-	ld hl, wEnemyMonActualCatchRate ; catch rate
+	ld hl, wEnemyMonActualCatchRate
 	srl [hl] ; halve catch rate
 	ld a, BAIT_ANIM
-	ld hl, wSafariBaitFactor ; bait factor
-	ld de, wSafariEscapeFactor ; escape factor
+	ld hl, wSafariBaitFactor
+	ld de, wSafariEscapeFactor
 	jr BaitRockCommon
 
 ; for CASCADEBADGE when used from the
@@ -1446,7 +1446,7 @@ ItemUseBait:
 ItemUseRock:
 	ld hl, ThrewRockText
 	call PrintText
-	ld hl, wEnemyMonActualCatchRate ; catch rate
+	ld hl, wEnemyMonActualCatchRate
 	ld a, [hl]
 	add a ; double catch rate
 	jr nc, .noCarry
@@ -1454,8 +1454,8 @@ ItemUseRock:
 .noCarry
 	ld [hl], a
 	ld a, ROCK_ANIM
-	ld hl, wSafariEscapeFactor ; escape factor
-	ld de, wSafariBaitFactor ; bait factor
+	ld hl, wSafariEscapeFactor
+	ld de, wSafariBaitFactor
 
 BaitRockCommon:
 	ld [wAnimationID], a
@@ -1984,11 +1984,11 @@ ItemUsePPRestore:
 	ld [wPlayerMoveListIndex], a
 	jr nz, .chooseMon
 	ld hl, wPartyMon1Moves
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call GetSelectedMoveOffset
 	push hl
 	ld a, [hl]
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetMoveName
 	call CopyToStringBuffer
 	pop hl
@@ -1996,7 +1996,7 @@ ItemUsePPRestore:
 	cp ETHER
 	jr nc, .useEther ; if Ether or Max Ether
 .usePPUp
-	ld bc, wPartyMon1PP - wPartyMon1Moves
+	ld bc, MON_PP - MON_MOVES
 	add hl, bc
 	ld a, [hl] ; move PP
 	cp 3 << 6 ; have 3 PP Ups already been used?
@@ -2009,7 +2009,7 @@ ItemUsePPRestore:
 	add 1 << 6 ; increase PP Up count by 1
 	ld [hl], a
 	ld a, 1 ; 1 PP Up used
-	ld [wd11e], a
+	ld [wUsingPPUp], a
 	call RestoreBonusPP ; add the bonus PP to current PP
 	ld hl, PPIncreasedText
 	call PrintText
@@ -2026,10 +2026,10 @@ ItemUsePPRestore:
 	cp b ; is the pokemon whose PP was restored active in battle?
 	jr nz, .skipUpdatingInBattleData
 	ld hl, wPartyMon1PP
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	ld de, wBattleMonPP
-	ld bc, 4
+	ld bc, NUM_MOVES
 	call CopyData ; copy party data to in-battle data
 .skipUpdatingInBattleData
 	ld a, SFX_HEAL_AILMENT
@@ -2048,9 +2048,9 @@ ItemUsePPRestore:
 	ld [wMonDataLocation], a
 	call GetMaxPP
 	ld hl, wPartyMon1Moves
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call GetSelectedMoveOffset
-	ld bc, wPartyMon1PP - wPartyMon1Moves
+	ld bc, MON_PP - MON_MOVES
 	add hl, bc ; hl now points to move's PP
 	ld a, [wMaxPP]
 	ld b, a
@@ -2058,7 +2058,7 @@ ItemUsePPRestore:
 	cp MAX_ETHER
 	jr z, .fullyRestorePP
 	ld a, [hl] ; move PP
-	and %00111111 ; lower 6 bit bits store current PP
+	and PP_MASK
 	cp b ; does current PP equal max PP?
 	ret z ; if so, return
 	add 10 ; increase current PP by 10
@@ -2071,16 +2071,16 @@ ItemUsePPRestore:
 	ld b, a
 .storeNewAmount
 	ld a, [hl] ; move PP
-	and %11000000 ; PP Up counter bits
+	and PP_UP_MASK
 	add b
 	ld [hl], a
 	ret
 .fullyRestorePP
 	ld a, [hl] ; move PP
-; Note that this code has a bug. It doesn't mask out the upper two bits, which
-; are used to count how many PP Ups have been used on the move. So, Max Ethers
-; and Max Elixirs will not be detected as having no effect on a move with full
-; PP if the move has had any PP Ups used on it.
+; Bug: This code doesn't mask out the upper two bits, which are used to count
+; how many PP Ups have been used on the move.
+; So, Max Ethers and Max Elixirs will not be detected as having no effect on
+; a move with full PP if the move has had any PP Ups used on it.
 	cp b ; does current PP equal max PP?
 	ret z
 	jr .storeNewAmount
@@ -2098,7 +2098,7 @@ ItemUsePPRestore:
 .elixirLoop
 	push bc
 	ld hl, wPartyMon1Moves
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call GetSelectedMoveOffset
 	ld a, [hl]
 	and a ; does the current slot have a move?
@@ -2162,9 +2162,9 @@ ItemUseTMHM:
 	add NUM_TMS + NUM_HMS ; adjust HM IDs to come after TM IDs
 .skipAdding
 	inc a
-	ld [wd11e], a
+	ld [wTempTMHM], a
 	predef TMToMove ; get move ID from TM/HM ID
-	ld a, [wd11e]
+	ld a, [wTempTMHM]
 	ld [wMoveNum], a
 	call GetMoveName
 	call CopyToStringBuffer
@@ -2195,7 +2195,7 @@ ItemUseTMHM:
 .chooseMon
 	ld hl, wStringBuffer
 	ld de, wTempMoveNameBuffer
-	ld bc, 14
+	ld bc, MOVE_NAME_LENGTH
 	call CopyData ; save the move name because DisplayPartyMenu will overwrite it
 	ld a, $ff
 	ld [wUpdateSpritesEnabled], a
@@ -2205,7 +2205,7 @@ ItemUseTMHM:
 	push af
 	ld hl, wTempMoveNameBuffer
 	ld de, wStringBuffer
-	ld bc, 14
+	ld bc, MOVE_NAME_LENGTH
 	call CopyData
 	pop af
 	jr nc, .checkIfAbleToLearnMove
@@ -2375,14 +2375,14 @@ GotOffBicycleText:
 ; [wCurrentMenuItem] = index of move (when using a PP Up)
 RestoreBonusPP:
 	ld hl, wPartyMon1Moves
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	ld a, [wWhichPokemon]
 	call AddNTimes
 	push hl
 	ld de, wNormalMaxPPList - 1
 	predef LoadMovePPs ; loads the normal max PP of each of the pokemon's moves to wNormalMaxPPList
 	pop hl
-	ld c, wPartyMon1PP - wPartyMon1Moves
+	ld c, MON_PP - MON_MOVES
 	ld b, 0
 	add hl, bc ; hl now points to move 1 PP
 	ld de, wNormalMaxPPList
@@ -2403,7 +2403,7 @@ RestoreBonusPP:
 	jr nz, .nextMove
 .skipMenuItemIDCheck
 	ld a, [hl]
-	and %11000000 ; have any PP Ups been used?
+	and PP_UP_MASK
 	call nz, AddBonusPP ; if so, add bonus PP
 .nextMove
 	inc hl
@@ -2468,13 +2468,13 @@ GetMaxPP:
 	ld a, [wMonDataLocation]
 	and a
 	ld hl, wPartyMon1Moves
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	jr z, .sourceWithMultipleMon
 	ld hl, wEnemyMon1Moves
 	dec a
 	jr z, .sourceWithMultipleMon
 	ld hl, wBoxMon1Moves
-	ld bc, wBoxMon2 - wBoxMon1
+	ld bc, BOXMON_STRUCT_LENGTH
 	dec a
 	jr z, .sourceWithMultipleMon
 	ld hl, wDayCareMonMoves
@@ -2501,7 +2501,7 @@ GetMaxPP:
 	ld b, a ; b = normal max PP
 	pop hl
 	push bc
-	ld bc, wPartyMon1PP - wPartyMon1Moves ; PP offset if not player's in-battle pokemon data
+	ld bc, MON_PP - MON_MOVES ; PP offset if not player's in-battle pokemon data
 	ld a, [wMonDataLocation]
 	cp 4 ; player's in-battle pokemon?
 	jr nz, .addPPOffset
@@ -2509,18 +2509,19 @@ GetMaxPP:
 .addPPOffset
 	add hl, bc
 	ld a, [hl] ; a = current PP
-	and %11000000 ; get PP Up count
+	and PP_UP_MASK
 	pop bc
 	or b ; place normal max PP in 6 lower bits of a
+	ASSERT wMoveData + MOVE_PP + 1 == wPPUpCountAndMaxPP
 	ld h, d
 	ld l, e
-	inc hl ; hl = wcd73
+	inc hl ; hl = wPPUpCountAndMaxPP
 	ld [hl], a
 	xor a ; add the bonus for the existing PP Up count
 	ld [wUsingPPUp], a
 	call AddBonusPP ; add bonus PP from PP Ups
 	ld a, [hl]
-	and %00111111 ; mask out the PP Up count
+	and PP_MASK
 	ld [wMaxPP], a ; store max PP
 	ret
 
@@ -2557,7 +2558,7 @@ TossItem_::
 	jr nz, .tooImportantToToss
 	push hl
 	ld a, [wCurItem]
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetItemName
 	call CopyToStringBuffer
 	ld hl, IsItOKToTossItemText
@@ -2577,7 +2578,7 @@ TossItem_::
 	ld a, [wWhichPokemon]
 	call RemoveItemFromInventory
 	ld a, [wCurItem]
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetItemName
 	call CopyToStringBuffer
 	ld hl, ThrewAwayItemText
@@ -2644,29 +2645,33 @@ IsKeyItem_::
 
 INCLUDE "data/items/key_items.asm"
 
+; store the new mon in the first slot, shifting all existing box data down
 SendNewMonToBox:
 	ld de, wBoxCount
 	ld a, [de]
 	inc a
 	ld [de], a
+
 	ld a, [wCurPartySpecies]
-	ld [wd0b5], a
+	ld [wCurSpecies], a
 	ld c, a
-.loop
+.shiftSpeciesLoop
 	inc de
 	ld a, [de]
 	ld b, a
 	ld a, c
 	ld c, b
 	ld [de], a
-	cp $ff
-	jr nz, .loop
+	cp -1
+	jr nz, .shiftSpeciesLoop
+
 	call GetMonHeader
 	ld hl, wBoxMonOT
 	ld bc, NAME_LENGTH
 	ld a, [wBoxCount]
 	dec a
-	jr z, .skip
+	jr z, .skipOTshift ; if the box was empty, there is nothing to shift
+
 	dec a
 	call AddNTimes
 	push hl
@@ -2678,7 +2683,7 @@ SendNewMonToBox:
 	ld a, [wBoxCount]
 	dec a
 	ld b, a
-.loop2
+.shiftMonOTLoop
 	push bc
 	push hl
 	ld bc, NAME_LENGTH
@@ -2690,15 +2695,18 @@ SendNewMonToBox:
 	add hl, bc
 	pop bc
 	dec b
-	jr nz, .loop2
-.skip
+	jr nz, .shiftMonOTLoop
+
+.skipOTshift
 	ld hl, wPlayerName
-	ld de, wBoxMonOT
+	ld de, wBoxMon1OT
 	ld bc, NAME_LENGTH
 	call CopyData
+
 	ld a, [wBoxCount]
 	dec a
-	jr z, .skip2
+	jr z, .skipNickShift
+
 	ld hl, wBoxMonNicks
 	ld bc, NAME_LENGTH
 	dec a
@@ -2712,7 +2720,7 @@ SendNewMonToBox:
 	ld a, [wBoxCount]
 	dec a
 	ld b, a
-.loop3
+.shiftNickLoop
 	push bc
 	push hl
 	ld bc, NAME_LENGTH
@@ -2724,21 +2732,24 @@ SendNewMonToBox:
 	add hl, bc
 	pop bc
 	dec b
-	jr nz, .loop3
-.skip2
-	ld hl, wBoxMonNicks
+	jr nz, .shiftNickLoop
+
+.skipNickShift
+	ld hl, wBoxMon1Nick
 	ld a, NAME_MON_SCREEN
 	ld [wNamingScreenType], a
 	predef AskName
+
 	ld a, [wBoxCount]
 	dec a
-	jr z, .skip3
+	jr z, .skipMonDataShift
+
 	ld hl, wBoxMons
-	ld bc, wBoxMon2 - wBoxMon1
+	ld bc, BOXMON_STRUCT_LENGTH
 	dec a
 	call AddNTimes
 	push hl
-	ld bc, wBoxMon2 - wBoxMon1
+	ld bc, BOXMON_STRUCT_LENGTH
 	add hl, bc
 	ld d, h
 	ld e, l
@@ -2746,20 +2757,21 @@ SendNewMonToBox:
 	ld a, [wBoxCount]
 	dec a
 	ld b, a
-.loop4
+.shiftMonDataLoop
 	push bc
 	push hl
-	ld bc, wBoxMon2 - wBoxMon1
+	ld bc, BOXMON_STRUCT_LENGTH
 	call CopyData
 	pop hl
 	ld d, h
 	ld e, l
-	ld bc, wBoxMon1 - wBoxMon2
+	ld bc, -BOXMON_STRUCT_LENGTH
 	add hl, bc
 	pop bc
 	dec b
-	jr nz, .loop4
-.skip3
+	jr nz, .shiftMonDataLoop
+
+.skipMonDataShift
 	ld a, [wEnemyMonLevel]
 	ld [wEnemyMonBoxLevel], a
 	ld hl, wEnemyMon
@@ -2789,11 +2801,12 @@ SendNewMonToBox:
 	inc de
 	xor a
 	ld b, NUM_STATS * 2
-.loop5
+.statLoop
 	ld [de], a
 	inc de
 	dec b
-	jr nz, .loop5
+	jr nz, .statLoop
+
 	ld hl, wEnemyMonDVs
 	ld a, [hli]
 	ld [de], a
@@ -2802,12 +2815,12 @@ SendNewMonToBox:
 	ld [de], a
 	ld hl, wEnemyMonPP
 	ld b, NUM_MOVES
-.loop6
+.movePPLoop
 	ld a, [hli]
 	inc de
 	ld [de], a
 	dec b
-	jr nz, .loop6
+	jr nz, .movePPLoop
 	ret
 
 ; checks if the tile in front of the player is a shore or water tile
@@ -2892,7 +2905,7 @@ ItemUseReloadOverworldData:
 	call LoadCurrentMapView
 	jp UpdateSprites
 
-; creates a list at wBuffer of maps where the mon in [wd11e] can be found.
+; creates a list at wBuffer of maps where the mon in [wPokedexNum] can be found.
 ; this is used by the pokedex to display locations the mon can be found on the map.
 FindWildLocationsOfMon:
 	ld hl, WildDataPointers
@@ -2927,7 +2940,7 @@ CheckMapForMon:
 	inc hl
 	ld b, NUM_WILDMONS
 .loop
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	cp [hl]
 	jr nz, .nextEntry
 	ld a, c

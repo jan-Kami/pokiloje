@@ -7,7 +7,7 @@ StoreTrainerHeaderPointer::
 	ret
 
 ; executes the current map script from the function pointer array provided in de.
-; a: map script index to execute (unless overridden by [wd733] bit 4)
+; a: map script index to execute (unless overridden by [wStatusFlags7] BIT_USE_CUR_MAP_SCRIPT)
 ; hl: trainer header pointer
 ExecuteCurMapScriptInTable::
 	push af
@@ -31,7 +31,7 @@ ExecuteCurMapScriptInTable::
 LoadGymLeaderAndCityName::
 	push de
 	ld de, wGymCityName
-	ld bc, $11
+	ld bc, GYM_CITY_LENGTH
 	call CopyData   ; load city name
 	pop hl
 	ld de, wGymLeaderName
@@ -149,7 +149,7 @@ ENDC
 	xor a ; EXCLAMATION_BUBBLE
 	ld [wWhichEmotionBubble], a
 	predef EmotionBubble
-	ld a, D_RIGHT | D_LEFT | D_UP | D_DOWN
+	ld a, PAD_CTRL_PAD
 	ld [wJoyIgnore], a
 	xor a
 	ldh [hJoyHeld], a
@@ -165,7 +165,7 @@ DisplayEnemyTrainerTextAndStartBattle::
 	ret nz ; return if the enemy trainer hasn't finished walking to the player's sprite
 	ld [wJoyIgnore], a
 	ld a, [wSpriteIndex]
-	ldh [hSpriteIndexOrTextID], a
+	ldh [hSpriteIndex], a
 	call DisplayTextID
 	; fall through
 
@@ -184,8 +184,8 @@ StartTrainerBattle::
 
 EndTrainerBattle::
 	ld hl, wCurrentMapScriptFlags
-	set 5, [hl]
-	set 6, [hl]
+	set BIT_CUR_MAP_LOADED_1, [hl]
+	set BIT_CUR_MAP_LOADED_2, [hl]
 	ld hl, wStatusFlags3
 	res BIT_PRINT_END_BATTLE_TEXT, [hl]
 	ld hl, wMiscFlags
@@ -349,7 +349,7 @@ PrintEndBattleText::
 	push af
 	ld a, [wEndBattleTextRomBank]
 	ldh [hLoadedROMBank], a
-	ld [MBC1RomBank], a
+	ld [rROMB], a
 	push hl
 	farcall SaveTrainerName
 	ld hl, TrainerEndBattleText
@@ -357,8 +357,8 @@ PrintEndBattleText::
 	pop hl
 	pop af
 	ldh [hLoadedROMBank], a
-	ld [MBC1RomBank], a
-	farcall FreezeEnemyTrainerSprite
+	ld [rROMB], a
+	farcall SetEnemyTrainerToStayAndFaceAnyDirection
 	jp WaitForSoundToFinish
 
 GetSavedEndBattleTextPointer::

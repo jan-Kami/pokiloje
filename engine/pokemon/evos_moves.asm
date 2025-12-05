@@ -94,8 +94,10 @@ Evolution_PartyMonLoop: ; loop over party mons
 	jr .doEvolution
 .checkItemEvo
 	ld a, [hli]
+	; Bug: Wild encounters can cause stone evolutions without
+	; having any stones available. This was fixed in Yellow.
 	ld b, a ; evolution item
-	ld a, [wCurItem]
+	ld a, [wCurItem] ; same as [wCurPartySpecies]
 	cp b ; was the evolution item in this entry used?
 	jp nz, .nextEvoEntry1 ; if not, go to the next evolution entry
 .checkLevel
@@ -135,7 +137,7 @@ Evolution_PartyMonLoop: ; loop over party mons
 	call PrintText
 	pop hl
 	ld a, [hl]
-	ld [wd0b5], a
+	ld [wCurSpecies], a
 	ld [wLoadedMonSpecies], a
 	ld [wEvoNewSpecies], a
 	ld a, MONSTER_NAME
@@ -153,35 +155,35 @@ Evolution_PartyMonLoop: ; loop over party mons
 	call DelayFrames
 	call ClearScreen
 	call RenameEvolvedMon
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	push af
-	ld a, [wd0b5]
-	ld [wd11e], a
+	ld a, [wCurSpecies]
+	ld [wPokedexNum], a
 	predef IndexToPokedex
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	dec a
 	ld hl, BaseStats
 	ld bc, BASE_DATA_SIZE
 	call AddNTimes
 	ld de, wMonHeader
 	call CopyData
-	ld a, [wd0b5]
+	ld a, [wCurSpecies]
 	ld [wMonHIndex], a
 	pop af
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	ld hl, wLoadedMonHPExp - 1
 	ld de, wLoadedMonStats
 	ld b, $1
 	call CalcStats
 	ld a, [wWhichPokemon]
 	ld hl, wPartyMon1
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 	ld e, l
 	ld d, h
 	push hl
 	push bc
-	ld bc, wPartyMon1MaxHP - wPartyMon1
+	ld bc, MON_MAXHP
 	add hl, bc
 	ld a, [hli]
 	ld b, a
@@ -203,8 +205,8 @@ Evolution_PartyMonLoop: ; loop over party mons
 	dec hl
 	pop bc
 	call CopyData
-	ld a, [wd0b5]
-	ld [wd11e], a
+	ld a, [wCurSpecies]
+	ld [wPokedexNum], a
 	xor a
 	ld [wMonDataLocation], a
 	call LearnMoveFromLevelUp
@@ -214,7 +216,7 @@ Evolution_PartyMonLoop: ; loop over party mons
 	and a
 	call z, Evolution_ReloadTilesetTilePatterns
 	predef IndexToPokedex
-	ld a, [wd11e]
+	ld a, [wPokedexNum]
 	dec a
 	ld c, a
 	ld b, FLAG_SET
@@ -260,13 +262,14 @@ Evolution_PartyMonLoop: ; loop over party mons
 RenameEvolvedMon:
 ; Renames the mon to its new, evolved form's standard name unless it had a
 ; nickname, in which case the nickname is kept.
-	ld a, [wd0b5]
+	ASSERT wCurSpecies == wNameListIndex ; save+restore wCurSpecies while using wNameListIndex
+	ld a, [wCurSpecies]
 	push af
 	ld a, [wMonHIndex]
-	ld [wd0b5], a
+	ld [wNameListIndex], a
 	call GetName
 	pop af
-	ld [wd0b5], a
+	ld [wCurSpecies], a
 	ld hl, wNameBuffer
 	ld de, wStringBuffer
 .compareNamesLoop
@@ -275,7 +278,7 @@ RenameEvolvedMon:
 	cp [hl]
 	inc hl
 	ret nz
-	cp "@"
+	cp '@'
 	jr nz, .compareNamesLoop
 	ld a, [wWhichPokemon]
 	ld bc, NAME_LENGTH
@@ -319,7 +322,7 @@ Evolution_ReloadTilesetTilePatterns:
 
 LearnMoveFromLevelUp:
 	ld hl, EvosMovesPointerTable
-	ld a, [wd11e] ; species
+	ld a, [wPokedexNum] ; species
 	ld [wCurPartySpecies], a
 	dec a
 	ld bc, 0
@@ -354,7 +357,7 @@ LearnMoveFromLevelUp:
 ; If it is not 0, this function will not work properly.
 	ld hl, wPartyMon1Moves
 	ld a, [wWhichPokemon]
-	ld bc, wPartyMon2 - wPartyMon1
+	ld bc, PARTYMON_STRUCT_LENGTH
 	call AddNTimes
 .next
 	ld b, NUM_MOVES
@@ -366,13 +369,13 @@ LearnMoveFromLevelUp:
 	jr nz, .checkCurrentMovesLoop
 	ld a, d
 	ld [wMoveNum], a
-	ld [wd11e], a
+	ld [wNamedObjectIndex], a
 	call GetMoveName
 	call CopyToStringBuffer
 	predef LearnMove
 .done
 	ld a, [wCurPartySpecies]
-	ld [wd11e], a
+	ld [wPokedexNum], a
 	ret
 
 ; writes the moves a mon has at level [wCurEnemyLevel] to [de]
@@ -455,7 +458,7 @@ WriteMonMoves:
 
 ; shift PP as well if learning moves from day care
 	push de
-	ld bc, wPartyMon1PP - (wPartyMon1Moves + 3)
+	ld bc, MON_PP - (MON_MOVES + 3)
 	add hl, bc
 	ld d, h
 	ld e, l
@@ -474,7 +477,7 @@ WriteMonMoves:
 ; write move PP value if learning moves from day care
 	push hl
 	ld a, [hl]
-	ld hl, wPartyMon1PP - wPartyMon1Moves
+	ld hl, MON_PP - MON_MOVES
 	add hl, de
 	push hl
 	dec a
