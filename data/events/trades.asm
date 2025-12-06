@@ -15,14 +15,15 @@ TradeMons:
 	; Red/Blue uses the original JP Red/Green trades but with the JP Blue
 	; post-trade text. English Yellow changed _AfterTrade2Text to
 	; not mention evolution.
-	npctrade NIDORINO,   NIDORINA,  TRADE_DIALOGSET_CASUAL,    "TERRY"
-	npctrade ABRA,       MR_MIME,   TRADE_DIALOGSET_CASUAL,    "MARCEL"
-	npctrade BUTTERFREE, BEEDRILL,  TRADE_DIALOGSET_HAPPY,     "CHIKUCHIKU" ; unused
-	npctrade PONYTA,     SEEL,      TRADE_DIALOGSET_CASUAL,    "SAILOR"
-	npctrade SPEAROW,    FARFETCHD, TRADE_DIALOGSET_HAPPY,     "DUX"
-	npctrade SLOWBRO,    LICKITUNG, TRADE_DIALOGSET_CASUAL,    "MARC"
-	npctrade POLIWHIRL,  JYNX,      TRADE_DIALOGSET_EVOLUTION, "LOLA"
-	npctrade RAICHU,     ELECTRODE, TRADE_DIALOGSET_EVOLUTION, "DORIS"
-	npctrade VENONAT,    TANGELA,   TRADE_DIALOGSET_HAPPY,     "CRINKLES"
-	npctrade NIDORAN_M,  NIDORAN_F, TRADE_DIALOGSET_HAPPY,     "SPOT"
+	npctrade NIDORINO,   NIDORINA,  TRADE_DIALOGSET_CASUAL,    "<POKIMON>󱦐󱥬󱤋󱤯󱤏󱦑" ; "TERRY"
+	npctrade ABRA,       MR_MIME,   TRADE_DIALOGSET_CASUAL,    "<POKIMON>󱦐󱤻󱤆󱥟󱤋󱦑" ; "MARCEL"
+	npctrade BUTTERFREE, BEEDRILL,  TRADE_DIALOGSET_HAPPY,     "<POKIMON>󱦐󱥙󱤌󱤘󱥰󱦑" ; "CHIKUCHIKU" ; unused
+	npctrade PONYTA,     SEEL,      TRADE_DIALOGSET_CASUAL,    "<POKIMON>󱦐󱥦󱤃󱤤󱥄󱦑" ; "SAILOR"
+	npctrade SPEAROW,    FARFETCHD, TRADE_DIALOGSET_HAPPY,     "<POKIMON>󱦐󱥩󱥱󱥚󱤂󱦑" ; "DUX"
+	npctrade SLOWBRO,    LICKITUNG, TRADE_DIALOGSET_CASUAL,    "<POKIMON>󱦐󱤶󱤈󱤚󱥰󱦑" ; "MARC"
+	npctrade POLIWHIRL,  JYNX,      TRADE_DIALOGSET_EVOLUTION, "<POKIMON>󱦐󱤦󱥄󱤢󱤀󱦑" ; "LOLA"
+	npctrade RAICHU,     ELECTRODE, TRADE_DIALOGSET_EVOLUTION, "<POKIMON>󱦐󱥨󱥆󱥜󱤎󱦑" ; "DORIS"
+	npctrade VENONAT,    TANGELA,   TRADE_DIALOGSET_HAPPY,     "<POKIMON>󱦐󱤗󱤌󱤾󱤗󱥅󱦑" ; "CRINKLES"
+	npctrade NIDORAN_M,  NIDORAN_F, TRADE_DIALOGSET_HAPPY,     "<POKIMON>󱦐󱥦󱤌󱥌󱥅󱦑" ; "SPOT"
+	; maybe consider looking at the JP nicknames instead?
 	assert_table_length NUM_NPC_TRADES
